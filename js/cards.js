@@ -18,6 +18,7 @@ const CardsModule = (() => {
 
                 el.onload = () => el.classList.add('lqip-loaded');
                 el.src = src;
+                if (el.tagName === 'VIDEO') el.load();
                 el.classList.remove('lazy-pending');
                 el.removeAttribute('data-lazy-src');
                 mediaObserver.unobserve(el);
