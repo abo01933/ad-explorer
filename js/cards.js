@@ -16,13 +16,9 @@ const CardsModule = (() => {
                 const src = el.dataset.lazySrc;
                 if (!src) return;
 
-                if (el.tagName === 'IMG') {
-                    el.src = src;
-                    el.removeAttribute('data-lazy-src');
-                } else if (el.tagName === 'VIDEO') {
-                    el.src = src;
-                    el.removeAttribute('data-lazy-src');
-                }
+                el.src = src;
+                el.classList.remove('lazy-pending');
+                el.removeAttribute('data-lazy-src');
                 mediaObserver.unobserve(el);
             });
         }, { rootMargin: '200px' });
@@ -171,20 +167,6 @@ const CardsModule = (() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Fallback HTML when media fails to load
-    function mediaFallback(adUrl, advertiserName) {
-        return `<div class="placeholder">
-            <svg class="w-8 h-8 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            <p class="text-xs text-gray-400 mb-2">${advertiserName || '素材已過期'}</p>
-            <a href="${adUrl}" target="_blank" onclick="event.stopPropagation()"
-               class="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-               在 Meta 查看
-            </a>
-        </div>`;
-    }
-
     // Create media preview HTML (uses data-lazy-src for deferred loading)
     function createMediaPreview(ad) {
         const mediaUrls = ad.media_urls || [];
@@ -194,7 +176,12 @@ const CardsModule = (() => {
         if (mediaUrls.length === 0) {
             return `
                 <div class="media-container bg-gray-100">
-                    ${mediaFallback(adUrl, advertiserName)}
+                    <div class="placeholder">
+                        <svg class="w-8 h-8 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-xs mt-2">無媒體預覽</p>
+                    </div>
                 </div>
             `;
         }
@@ -205,9 +192,11 @@ const CardsModule = (() => {
         if (isVideo) {
             return `
                 <div class="media-container">
-                    <video data-lazy-src="${firstUrl}" muted preload="none"
+                    <video class="lazy-pending" data-lazy-src="${firstUrl}"
+                           data-ad-url="${adUrl}" data-advertiser="${advertiserName}"
+                           muted preload="none"
                            onmouseover="this.play()" onmouseout="this.pause();this.currentTime=0;"
-                           onerror="this.outerHTML='${mediaFallback(adUrl, advertiserName).replace(/'/g, "\\'").replace(/\n/g, '')}'">>
+                           onerror="applyMediaFallback(this)">
                     </video>
                     <div class="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-1">
                         <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -220,8 +209,9 @@ const CardsModule = (() => {
 
         return `
             <div class="media-container">
-                <img data-lazy-src="${firstUrl}" src="" alt="Ad preview"
-                     onerror="this.outerHTML='${mediaFallback(adUrl, advertiserName).replace(/'/g, "\\'").replace(/\n/g, '')}'">
+                <img class="lazy-pending" data-lazy-src="${firstUrl}"
+                     data-ad-url="${adUrl}" data-advertiser="${advertiserName}"
+                     alt="Ad preview" onerror="applyMediaFallback(this)">
                 ${mediaUrls.length > 1 ? `
                     <div class="absolute bottom-2 right-2 bg-black bg-opacity-50 rounded px-2 py-0.5 text-white text-xs">
                         +${mediaUrls.length - 1}
@@ -545,3 +535,26 @@ const CardsModule = (() => {
         filterByAdvertiser
     };
 })();
+
+// Global fallback handler — called via onerror attribute
+function applyMediaFallback(el) {
+    const adUrl = el.dataset.adUrl || '#';
+    const name = el.dataset.advertiser || '素材已過期';
+    const container = el.parentElement;
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.className = 'placeholder';
+    div.innerHTML = `
+        <svg class="w-8 h-8 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <p class="text-xs text-gray-400 mb-2">${name}</p>
+        <a href="${adUrl}" target="_blank" onclick="event.stopPropagation()"
+           class="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+            在 Meta 查看
+        </a>
+    `;
+    el.replaceWith(div);
+}
