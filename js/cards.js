@@ -16,6 +16,7 @@ const CardsModule = (() => {
                 const src = el.dataset.lazySrc;
                 if (!src) return;
 
+                el.onload = () => el.classList.add('lqip-loaded');
                 el.src = src;
                 el.classList.remove('lazy-pending');
                 el.removeAttribute('data-lazy-src');
@@ -207,10 +208,13 @@ const CardsModule = (() => {
             `;
         }
 
+        const lqip = ad.thumbnail_lqip || '';
         return `
             <div class="media-container">
-                <img class="lazy-pending" data-lazy-src="${firstUrl}"
+                <img class="${lqip ? 'lqip-blur' : 'lazy-pending'}"
+                     data-lazy-src="${firstUrl}"
                      data-ad-url="${adUrl}" data-advertiser="${advertiserName}"
+                     ${lqip ? `src="${lqip}"` : ''}
                      alt="Ad preview" onerror="applyMediaFallback(this)">
                 ${mediaUrls.length > 1 ? `
                     <div class="absolute bottom-2 right-2 bg-black bg-opacity-50 rounded px-2 py-0.5 text-white text-xs">

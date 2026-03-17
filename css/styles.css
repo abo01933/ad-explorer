@@ -62,6 +62,18 @@
     100% { background-position: -200% 0; }
 }
 
+/* LQIP blur-up effect */
+.media-container img.lqip-blur {
+    filter: blur(8px);
+    transform: scale(1.05);
+    transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.media-container img.lqip-blur.lqip-loaded {
+    filter: blur(0);
+    transform: scale(1);
+}
+
 .media-container .placeholder {
     position: absolute;
     top: 50%;
