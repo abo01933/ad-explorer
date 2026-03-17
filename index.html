@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Explorer - Meta Ads Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="flex items-center justify-between px-6 py-3">
+            <div class="flex items-center gap-3">
+                <h1 class="text-xl font-bold text-gray-800">Ad Explorer</h1>
+                <span class="text-sm text-gray-500">Meta Ads Analysis Tool</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="ads-count" class="text-sm text-gray-600">載入中...</span>
+                <nav class="flex gap-2">
+                    <button data-view="list" class="view-btn active px-4 py-2 rounded-lg text-sm font-medium bg-blue-500 text-white">廣告列表</button>
+                    <button data-view="charts" class="view-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">統計圖表</button>
+                    <button data-view="timeline" class="view-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">時間軸</button>
+                    <button data-view="compare" class="view-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">競品比對</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="flex pt-16">
+        <!-- Sidebar Filters -->
+        <aside id="sidebar" class="w-72 bg-white border-r border-gray-200 fixed left-0 top-16 bottom-0 overflow-y-auto">
+            <div class="p-4 h-full flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-semibold text-gray-700">篩選條件</h2>
+                    <button id="reset-filters" class="text-sm text-blue-500 hover:text-blue-700">重置</button>
+                </div>
+
+                <!-- Search -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">關鍵字搜尋</label>
+                    <input type="text" id="search-input" placeholder="搜尋廣告文案、標題..."
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- Exclude Filters -->
+                <div class="mb-4 space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-amber-50 rounded-lg border border-amber-200">
+                        <input type="checkbox" id="exclude-generic" class="w-4 h-4 text-amber-500 rounded" checked>
+                        <span class="text-sm text-amber-700">排除 Google Play / App Store</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-green-50 rounded-lg border border-green-200">
+                        <input type="checkbox" id="exclude-go-domains" class="w-4 h-4 text-green-500 rounded">
+                        <span class="text-sm text-green-700">排除 https://go. 開頭網址</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer p-2 bg-blue-50 rounded-lg border border-blue-200">
+                        <input type="checkbox" id="exclude-non-gambling" class="w-4 h-4 text-blue-500 rounded">
+                        <span class="text-sm text-blue-700">排除非博弈廣告（影音/家具/食品等）</span>
+                    </label>
+                </div>
+
+                <!-- Country Filter -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">國家偵測</label>
+                    <select id="country-filter" class="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                        <option value="">全部國家</option>
+                    </select>
+                </div>
+
+                <!-- Keyword Filter -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-600 mb-2">Keyword 分類</label>
+                    <div id="keyword-filters" class="space-y-1 max-h-40 overflow-y-auto">
+                        <!-- Dynamic checkboxes -->
+                    </div>
+                </div>
+
+                <!-- Other Domains Filter -->
+                <div class="flex-1 flex flex-col min-h-0 mb-4 pt-4 border-t border-gray-200">
+                    <label class="block text-sm font-medium text-gray-600 mb-2">建議觀察 Domain (Top 80)</label>
+                    <div id="domain-filters" class="space-y-1 flex-1 overflow-y-auto">
+                        <!-- Dynamic domain checkboxes -->
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="ml-72 flex-1 p-6">
+            <!-- List View -->
+            <div id="list-view" class="view-content">
+                <!-- Sort Controls -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-4">
+                        <label class="text-sm text-gray-600">排序：</label>
+                        <select id="sort-select" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                            <option value="running_days-desc">運行天數（高到低）</option>
+                            <option value="running_days-asc">運行天數（低到高）</option>
+                            <option value="page_like_count-desc">粉絲數（高到低）</option>
+                            <option value="page_like_count-asc">粉絲數（低到高）</option>
+                            <option value="last_seen-desc">最近更新</option>
+                            <option value="first_seen-desc">最早開始</option>
+                        </select>
+                        <label class="text-sm text-gray-600">類型：</label>
+                        <select id="media-type-filter" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                            <option value="">全部</option>
+                            <!-- Dynamic options -->
+                        </select>
+                    </div>
+                    <div id="pagination-info" class="text-sm text-gray-600"></div>
+                </div>
+
+                <!-- Ads Grid -->
+                <div id="ads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- Dynamic ad cards -->
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" class="flex justify-center items-center gap-2 mt-6">
+                    <!-- Dynamic pagination -->
+                </div>
+            </div>
+
+            <!-- Charts View -->
+            <div id="charts-view" class="view-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-semibold mb-4">媒體類型分佈</h3>
+                        <canvas id="media-type-chart"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-semibold mb-4">CTA 類型分佈</h3>
+                        <canvas id="cta-chart"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-semibold mb-4">Keyword 分佈</h3>
+                        <canvas id="keyword-chart"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-semibold mb-4">運行天數分佈</h3>
+                        <canvas id="running-days-chart"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 lg:col-span-2">
+                        <h3 class="text-lg font-semibold mb-4">Top 20 廣告主（依廣告數量）</h3>
+                        <canvas id="top-advertisers-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline View -->
+            <div id="timeline-view" class="view-content hidden">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">廣告時間軸分析</h3>
+                    <p class="text-sm text-gray-600 mb-4">查看廣告隨時間的數量變化趨勢</p>
+                    <div class="flex items-center gap-4 mb-4">
+                        <label class="text-sm text-gray-600">時間粒度：</label>
+                        <select id="timeline-granularity" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                            <option value="day">每日</option>
+                            <option value="week" selected>每週</option>
+                            <option value="month">每月</option>
+                        </select>
+                        <label class="text-sm text-gray-600 ml-4">顯示方式：</label>
+                        <select id="timeline-mode" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                            <option value="new">新增廣告數</option>
+                            <option value="active">活躍廣告數</option>
+                            <option value="cumulative">累計廣告數</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+                    <div class="h-80">
+                        <canvas id="timeline-chart"></canvas>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-semibold mb-4">各 Keyword 時間趨勢</h3>
+                        <div class="h-64">
+                            <canvas id="timeline-keyword-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-semibold mb-4">Top 廣告主時間趨勢</h3>
+                        <div class="h-64">
+                            <canvas id="timeline-advertiser-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compare View -->
+            <div id="compare-view" class="view-content hidden">
+                <!-- Compare Mode Tabs -->
+                <div class="flex gap-2 mb-6">
+                    <button data-compare-mode="manual" class="compare-mode-btn active px-4 py-2 rounded-lg text-sm font-medium bg-blue-500 text-white">手動選擇</button>
+                    <button data-compare-mode="keyword" class="compare-mode-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">Keyword 分群</button>
+                    <button data-compare-mode="fingerprint" class="compare-mode-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">Fingerprint 偵測</button>
+                </div>
+
+                <!-- Manual Compare -->
+                <div id="manual-compare" class="compare-content">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+                        <h3 class="text-lg font-semibold mb-4">選擇廣告主進行比較（最多 5 個）</h3>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <input type="text" id="advertiser-search" placeholder="搜尋廣告主..."
+                                   class="flex-1 min-w-64 px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div id="advertiser-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-60 overflow-y-auto">
+                            <!-- Dynamic advertiser checkboxes -->
+                        </div>
+                    </div>
+                    <div id="selected-advertisers" class="flex flex-wrap gap-2 mb-6">
+                        <!-- Selected advertiser tags -->
+                    </div>
+                    <div id="compare-result" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Compare charts and tables -->
+                    </div>
+                </div>
+
+                <!-- Keyword Group -->
+                <div id="keyword-compare" class="compare-content hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+                        <h3 class="text-lg font-semibold mb-4">選擇 Keyword 查看該分類廣告主</h3>
+                        <div id="keyword-group-buttons" class="flex flex-wrap gap-2">
+                            <!-- Dynamic keyword buttons -->
+                        </div>
+                    </div>
+                    <div id="keyword-group-result">
+                        <!-- Keyword group comparison -->
+                    </div>
+                </div>
+
+                <!-- Fingerprint Detection -->
+                <div id="fingerprint-compare" class="compare-content hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+                        <h3 class="text-lg font-semibold mb-4">重複素材偵測</h3>
+                        <p class="text-sm text-gray-600 mb-4">找出相同 Creative Fingerprint 的廣告，這些廣告使用相同素材</p>
+                        <div class="flex items-center gap-4">
+                            <label class="text-sm text-gray-600">最少重複次數：</label>
+                            <input type="number" id="fingerprint-min" value="2" min="2"
+                                   class="w-20 px-2 py-1 border border-gray-300 rounded text-sm">
+                            <button id="detect-fingerprints" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600">偵測</button>
+                        </div>
+                    </div>
+                    <div id="fingerprint-result">
+                        <!-- Fingerprint detection results -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Ad Detail Modal -->
+    <div id="ad-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 id="modal-title" class="text-xl font-bold"></h3>
+                    <button id="close-modal" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                <div id="modal-content">
+                    <!-- Dynamic modal content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/cards.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/timeline.js"></script>
+    <script src="js/compare.js"></script>
+    <script src="js/keyword-group.js"></script>
+    <script src="js/fingerprint.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

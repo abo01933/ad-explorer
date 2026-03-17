@@ -1,0 +1,320 @@
+/* Custom Styles for Ad Explorer */
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Card Hover Effects */
+.ad-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ad-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Media Container */
+.media-container {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    background: #f3f4f6;
+    overflow: hidden;
+}
+
+.media-container img,
+.media-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.media-container .placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #9ca3af;
+    text-align: center;
+}
+
+/* Badge Styles */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.badge-viral {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.badge-video {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.badge-image {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.badge-carousel {
+    background: #f3e8ff;
+    color: #9333ea;
+}
+
+.badge-unknown {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* Filter Checkbox Styling */
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.filter-checkbox:hover {
+    background: #f3f4f6;
+}
+
+.filter-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    accent-color: #3b82f6;
+}
+
+/* Disabled filter style */
+.filter-checkbox.opacity-40 {
+    cursor: not-allowed;
+}
+
+.filter-checkbox.opacity-40:hover {
+    background: transparent;
+}
+
+/* Filter count badge */
+.filter-count {
+    margin-left: auto;
+}
+
+/* Button Active States */
+.view-btn.active,
+.compare-mode-btn.active {
+    background: #3b82f6 !important;
+    color: white !important;
+}
+
+/* Pagination Buttons */
+.page-btn {
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.15s;
+}
+
+.page-btn:hover:not(.active):not(:disabled) {
+    background: #e5e7eb;
+}
+
+.page-btn.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Compare Table */
+.compare-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.compare-table th,
+.compare-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.compare-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
+
+.compare-table tr:hover td {
+    background: #f9fafb;
+}
+
+/* Advertiser Tag */
+.advertiser-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    color: #1d4ed8;
+}
+
+.advertiser-tag button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #bfdbfe;
+    color: #1d4ed8;
+    font-size: 14px;
+    line-height: 1;
+    transition: background 0.15s;
+}
+
+.advertiser-tag button:hover {
+    background: #93c5fd;
+}
+
+/* Fingerprint Group Card */
+.fingerprint-group {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.fingerprint-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Keyword Button */
+.keyword-btn {
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.15s;
+}
+
+.keyword-btn:hover {
+    transform: scale(1.02);
+}
+
+.keyword-btn.active {
+    box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* Loading Spinner */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Modal Animation */
+#ad-modal {
+    transition: opacity 0.2s ease;
+}
+
+#ad-modal.show {
+    opacity: 1;
+}
+
+#ad-modal > div {
+    transition: transform 0.2s ease;
+    transform: scale(0.95);
+}
+
+#ad-modal.show > div {
+    transform: scale(1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    #sidebar {
+        width: 260px;
+    }
+
+    main {
+        margin-left: 260px;
+    }
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        position: fixed;
+        left: -280px;
+        transition: left 0.3s ease;
+        z-index: 40;
+    }
+
+    #sidebar.open {
+        left: 0;
+    }
+
+    main {
+        margin-left: 0;
+    }
+}

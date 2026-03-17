@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150">
+  <rect fill="#f3f4f6" width="200" height="150"/>
+  <g fill="#9ca3af">
+    <path d="M85 55h30v40H85z" opacity="0.3"/>
+    <circle cx="95" cy="65" r="8" opacity="0.5"/>
+    <path d="M85 85l10-15 8 10 12-20 10 25H85z" opacity="0.4"/>
+  </g>
+  <text x="100" y="120" font-family="Arial, sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle">No Preview</text>
+</svg>
