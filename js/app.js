@@ -1,8 +1,6 @@
 // Global market switch function (called directly from HTML onclick)
 window.switchMarket = async function(market) {
-    console.log('switchMarket called:', market, '_appReady:', window._appReady, 'current:', DataModule.getCurrentMarket());
-    if (!window._appReady) { alert('app not ready'); return; }
-    if (market === DataModule.getCurrentMarket()) { alert('same market: ' + market); return; }
+    if (market === DataModule.getCurrentMarket()) return;
 
     document.querySelectorAll('.market-btn').forEach(b => {
         if (b.dataset.market === market) {
@@ -33,8 +31,6 @@ window.switchMarket = async function(market) {
         console.error('Market switch failed:', e);
     }
 };
-window._appReady = false;
-
 // Main Application Entry Point
 (async function() {
     // Show loading state
@@ -208,7 +204,6 @@ window._appReady = false;
         }
     });
 
-    window._appReady = true;
     console.log('Ad Explorer initialized successfully!');
     console.log(`Loaded ${DataModule.getAllAds().length} ads from ${DataModule.getMetadata().advertisers.length} advertisers`);
 })();
