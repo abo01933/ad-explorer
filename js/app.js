@@ -1,7 +1,8 @@
 // Global market switch function (called directly from HTML onclick)
 window.switchMarket = async function(market) {
-    if (!window._appReady) return;
-    if (market === DataModule.getCurrentMarket()) return;
+    console.log('switchMarket called:', market, '_appReady:', window._appReady, 'current:', DataModule.getCurrentMarket());
+    if (!window._appReady) { alert('app not ready'); return; }
+    if (market === DataModule.getCurrentMarket()) { alert('same market: ' + market); return; }
 
     document.querySelectorAll('.market-btn').forEach(b => {
         if (b.dataset.market === market) {
