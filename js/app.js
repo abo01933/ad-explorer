@@ -1,3 +1,39 @@
+// Global market switch function (called directly from HTML onclick)
+window.switchMarket = async function(market) {
+    if (!window._appReady) return;
+    if (market === DataModule.getCurrentMarket()) return;
+
+    document.querySelectorAll('.market-btn').forEach(b => {
+        if (b.dataset.market === market) {
+            b.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
+            b.classList.remove('text-gray-500');
+        } else {
+            b.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
+            b.classList.add('text-gray-500');
+        }
+    });
+
+    document.getElementById('ads-count').textContent = '載入中...';
+    document.getElementById('ads-grid').innerHTML = `
+        <div class="col-span-full flex justify-center py-12">
+            <div class="spinner"></div>
+        </div>
+    `;
+
+    // Switch to list view
+    document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
+    document.getElementById('list-view').classList.remove('hidden');
+
+    try {
+        await DataModule.loadData(market);
+        FiltersModule.resetFilters();
+        FiltersModule.updateAdsCount();
+    } catch (e) {
+        console.error('Market switch failed:', e);
+    }
+};
+window._appReady = false;
+
 // Main Application Entry Point
 (async function() {
     // Show loading state
@@ -171,6 +207,7 @@
         }
     });
 
+    window._appReady = true;
     console.log('Ad Explorer initialized successfully!');
     console.log(`Loaded ${DataModule.getAllAds().length} ads from ${DataModule.getMetadata().advertisers.length} advertisers`);
 })();
