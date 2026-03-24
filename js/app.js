@@ -42,6 +42,40 @@
         });
     });
 
+    // Market switching
+    document.querySelectorAll('.market-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const market = btn.dataset.market;
+            if (market === DataModule.getCurrentMarket()) return;
+
+            // Update button states
+            document.querySelectorAll('.market-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.market === market);
+                if (b.dataset.market === market) {
+                    b.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
+                    b.classList.remove('text-gray-500');
+                } else {
+                    b.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
+                    b.classList.add('text-gray-500');
+                }
+            });
+
+            // Show loading
+            document.getElementById('ads-count').textContent = '載入中...';
+            document.getElementById('ads-grid').innerHTML = `
+                <div class="col-span-full flex justify-center py-12">
+                    <div class="spinner"></div>
+                </div>
+            `;
+
+            // Reload data for new market
+            await DataModule.loadData(market);
+            FiltersModule.initFilters();
+            FiltersModule.applyFilters();
+            FiltersModule.updateAdsCount();
+        });
+    });
+
     // Compare mode switching
     document.querySelectorAll('.compare-mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {

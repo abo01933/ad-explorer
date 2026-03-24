@@ -1,5 +1,6 @@
 // Data Loading Module
 const DataModule = (() => {
+    let currentMarket = 'bangladesh';
     let adsData = [];
     let filteredData = [];
     let metadata = {
@@ -15,22 +16,38 @@ const DataModule = (() => {
     };
 
     // Load data from JSON file
-    async function loadData() {
-        try {
-            const response = await fetch('data/ads.json');
-            if (!response.ok) throw new Error('Failed to load data');
-            const json = await response.json();
-            adsData = json.ads || [];
-            adsData.forEach(ad => {
-                ad.country = detectCountry(ad);
-            });
-            filteredData = [...adsData];
-            extractMetadata();
-            return true;
-        } catch (error) {
-            console.error('Error loading data:', error);
-            return false;
+    async function loadData(market = null) {
+        if (market) currentMarket = market;
+
+        // 優先嘗試市場專屬檔案，fallback 到 ads.json
+        const filesToTry = [
+            `data/ads_${currentMarket}.json`,
+            'data/ads.json'
+        ];
+
+        for (const file of filesToTry) {
+            try {
+                const response = await fetch(file);
+                if (!response.ok) continue;
+                const json = await response.json();
+                adsData = json.ads || [];
+                adsData.forEach(ad => {
+                    ad.country = detectCountry(ad);
+                });
+                filteredData = [...adsData];
+                extractMetadata();
+                return true;
+            } catch (e) {
+                continue;
+            }
         }
+
+        console.error('Failed to load data for market:', currentMarket);
+        return false;
+    }
+
+    function getCurrentMarket() {
+        return currentMarket;
     }
 
     // Detect country from ad URL and text content
@@ -234,6 +251,7 @@ const DataModule = (() => {
 
     return {
         loadData,
+        getCurrentMarket,
         getAllAds,
         getFilteredAds,
         setFilteredAds,
