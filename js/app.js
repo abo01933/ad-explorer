@@ -43,37 +43,47 @@
     });
 
     // Market switching
-    document.querySelectorAll('.market-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const market = btn.dataset.market;
-            if (market === DataModule.getCurrentMarket()) return;
+    async function switchMarket(market) {
+        if (market === DataModule.getCurrentMarket()) return;
 
-            // Update button states
-            document.querySelectorAll('.market-btn').forEach(b => {
-                b.classList.toggle('active', b.dataset.market === market);
-                if (b.dataset.market === market) {
-                    b.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
-                    b.classList.remove('text-gray-500');
-                } else {
-                    b.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
-                    b.classList.add('text-gray-500');
-                }
-            });
+        // Update button states
+        document.querySelectorAll('.market-btn').forEach(b => {
+            if (b.dataset.market === market) {
+                b.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
+                b.classList.remove('text-gray-500');
+            } else {
+                b.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
+                b.classList.add('text-gray-500');
+            }
+        });
 
-            // Show loading
-            document.getElementById('ads-count').textContent = '載入中...';
+        // Show loading
+        document.getElementById('ads-count').textContent = '載入中...';
+        document.getElementById('ads-grid').innerHTML = `
+            <div class="col-span-full flex justify-center py-12">
+                <div class="spinner"></div>
+            </div>
+        `;
+
+        // Switch to list view
+        switchView('list');
+
+        try {
+            await DataModule.loadData(market);
+            FiltersModule.resetFilters();
+            FiltersModule.updateAdsCount();
+        } catch (e) {
+            console.error('Market switch failed:', e);
             document.getElementById('ads-grid').innerHTML = `
-                <div class="col-span-full flex justify-center py-12">
-                    <div class="spinner"></div>
+                <div class="col-span-full text-center py-12 text-red-500">
+                    <p>切換市場失敗，請重新整理頁面</p>
                 </div>
             `;
+        }
+    }
 
-            // Reload data for new market
-            await DataModule.loadData(market);
-            FiltersModule.initFilters();
-            FiltersModule.applyFilters();
-            FiltersModule.updateAdsCount();
-        });
+    document.querySelectorAll('.market-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchMarket(btn.dataset.market));
     });
 
     // Compare mode switching
