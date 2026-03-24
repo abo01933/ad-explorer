@@ -25,6 +25,7 @@ window.switchMarket = async function(market) {
 
     try {
         await DataModule.loadData(market);
+        FiltersModule.initFilters();
         FiltersModule.resetFilters();
         FiltersModule.updateAdsCount();
     } catch (e) {
